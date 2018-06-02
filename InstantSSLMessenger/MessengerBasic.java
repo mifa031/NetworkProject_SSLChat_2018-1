@@ -57,7 +57,7 @@ public abstract class MessengerBasic {
 						case OK:
 							NetData.flip();
 							while(NetData.hasRemaining()) {
-								channel.send(NetData);
+								channel.write(NetData);
 							}
 							break;
 						case BUFFER_OVERFLOW:
@@ -70,7 +70,7 @@ public abstract class MessengerBasic {
 							try {
 								NetData.flip();
 								while(NetData.hasRemaining()) {
-									channel.send(NetData);
+									channel.write(NetData);
 								}
 								NodeNetData.clear();
 							}catch(Exception e) {
@@ -95,7 +95,7 @@ public abstract class MessengerBasic {
 		         case NOT_HANDSHAKING: //핸드 쉐이킹이 안됬을때 
 		               break;
 		         default:
-		               throw new IllegalStateException("정의 되지않은 SSL엔진의 상태 : "+result.getStatus());
+		               throw new IllegalStateException("정의 되지않은 SSL엔진의 상태 : "+hstatus);
 				case NEED_UNWRAP:
 					if(channel.read(NodeNetData) < 0 ) {
 						if(engine.isInboundDone() && engine.isOutboundDone()) {//엔진의 인바운드,아웃바운드 검사
@@ -130,7 +130,7 @@ public abstract class MessengerBasic {
 						NodeAppData= enlargeAppBuffer(engine,NodeAppData);
 						break;
 					case BUFFER_UNDERFLOW://언더 플로우 발생->넷 버퍼 사이즈 조정
-						NodeNetData= handleBufferUnderflow(engine,NodeNetData);
+						NodeNetData= manageBufferUnderflow(engine,NodeNetData);
 						break;
 					case CLOSED:
 						if(engine.isInboundDone()) {
@@ -167,7 +167,7 @@ public abstract class MessengerBasic {
 		return buffer;
 	}
 	//언더 플로우 처리함수
-	protected ByteBuffer handleBufferUnderflow(SSLEngine engine,ByteBuffer buffer) {
+	protected ByteBuffer manageBufferUnderflow(SSLEngine engine,ByteBuffer buffer) {
 		if(engine.getSession().getPacketBufferSize() < buffer.limit()) {
 			return buffer;
 		}else {
@@ -184,7 +184,7 @@ public abstract class MessengerBasic {
 		channel.close();
 	}
 	
-	protected void handelEndOfStream(SocketChannel channel,SSLEngine engine) throws IOException {
+	protected void manageEndOfStream(SocketChannel channel,SSLEngine engine) throws IOException {
 		try {
 			engine.closeInbound();
 		}catch(Exception e) {
