@@ -25,8 +25,7 @@ public class MessengerServer extends MessengerBasic{
 	private SSLContext context;
 	private Selector selector;
 	private Queue queue = new LinkedList();
-	static MessengerChatRoom mcr=null;
-	static MessengerChatUser mcu=null;
+
 	//서버 초기화 작업
 	public MessengerServer(String protocol, String hostAddress, int portNumber) throws Exception {
 		
@@ -40,6 +39,7 @@ public class MessengerServer extends MessengerBasic{
 		NodeAppData=ByteBuffer.allocate(session.getApplicationBufferSize());
 		NodeNetData=ByteBuffer.allocate(session.getPacketBufferSize());
 		session.invalidate();
+		
 		
 		//실렉터 프로바이더로 실렉터 생성과 초기화
 		selector=SelectorProvider.provider().openSelector();
@@ -72,31 +72,34 @@ public class MessengerServer extends MessengerBasic{
 		}
 	}
 	//클라이언트로 메시지 받음
-	protected void recv(SocketChannel channel,SSLEngine engine) throws IOException {
+	synchronized protected void recv(SocketChannel channel,SSLEngine engine) throws IOException {
 		NodeNetData.clear();
-		
 		int byterecv = channel.read(NodeNetData);
+		
 		if(byterecv > 0) {
 			NodeNetData.flip();
 			
 			while(NodeNetData.hasRemaining()) {
 				
 				NodeAppData.clear();
+				NodeAppData.put(new byte[1024]);
+				NodeAppData.clear();
 				SSLEngineResult result = engine.unwrap(NodeNetData, NodeAppData);
 				
 				switch(result.getStatus()) {
 				case OK:
-					NodeAppData.flip();//제거 대상?
+					//NodeAppData.flip();//제거 대상?
 					;
-					//System.out.println("유저 이름 : "+new String(NodeAppData.array()));
-					send(channel,engine,"InstantMessenger에 오신것을 환영합니다.");
-					//send(channel,engine,new String(NodeAppData.array()));
+					System.out.println("유저 이름 : "+new String(NodeAppData.array()));
+					//send(channel,engine,"InstantMessenger에 오신것을 환영합니다.");
+					send(channel,engine,new String(NodeAppData.array()));
 					break;
 				case BUFFER_OVERFLOW:
 					NodeAppData = enlargeAppBuffer(engine,NodeAppData);
 					break;
 				case BUFFER_UNDERFLOW:
 					NodeNetData = manageBufferUnderflow(engine,NodeNetData);
+					break;
 				case CLOSED:
 					System.out.println("클라이언트 쪽의 종료 요청으로, 채팅 서버를 종료합니다.");
 					closeConnection(channel,engine);
@@ -111,7 +114,7 @@ public class MessengerServer extends MessengerBasic{
 		}
 	}
 	//클라이언트로 메시지 전송
-	public void send(SocketChannel channel,SSLEngine engine,String m)throws IOException{
+	synchronized public void send(SocketChannel channel,SSLEngine engine,String m)throws IOException{
 		
 		AppData.clear();
 		AppData.put(m.getBytes());
@@ -148,7 +151,7 @@ public class MessengerServer extends MessengerBasic{
 		selector.wakeup();
 	}
 	//서버 구동
-	public void run() throws Exception{
+	synchronized public void run() throws Exception{
 		System.out.println("InstantSSLMessenger Server를 구동합니다.");
 		
 		while(isActivated()) {
@@ -166,25 +169,19 @@ public class MessengerServer extends MessengerBasic{
 				if(k.isAcceptable()) {
 					accept(k);
 				}else if(k.isReadable()) {
+					NodeNetData.clear();
+					NodeNetData.put(new byte[1024]);
+					NodeNetData.clear();
 					recv((SocketChannel) k.channel(),(SSLEngine) k.attachment());
 				}
 			}
 		}
 		System.out.println("InstantSSLMessenger Server가 종료됩니다.");
 	}
-	public static void createChatRoom() {
-			mcr = MessengerChatRoomManager.createChatRoom(mcu);
-	}
-	public static void createChatUser(String nickName) {
-		    mcu = new MessengerChatUser(nickName);
-	}
-	public static List getChatRoomList() {
-		return MessengerChatRoomManager.roomList;
-	}
-	
+
 	public static void main(String args[]) {
 		try {
-			MessengerServer svr = new MessengerServer("TLS","59.187.211.231",8500);
+			MessengerServer svr = new MessengerServer("TLS","127.0.0.1",8500);
 			svr.run();
 				
 		}catch(Exception e) {

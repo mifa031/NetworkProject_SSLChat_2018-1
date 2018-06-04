@@ -14,7 +14,7 @@ import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 
-public class MessengerClient extends MessengerBasic{
+public class MessengerClient extends MessengerBasic implements Runnable{
 	private String remoteAddr;
 	private int portNum;
 	private static SSLEngine engine;
@@ -59,12 +59,14 @@ public class MessengerClient extends MessengerBasic{
 	}
 	//**send 부분**
 	// 버퍼를 생성->랩핑->랩핑한 버퍼를 체널에 써서, send!
-	protected void send(SocketChannel channel,SSLEngine engine,String message) throws IOException {
+ synchronized protected void send(SocketChannel channel,SSLEngine engine,String message) throws IOException {
 		AppData.clear();
 		AppData.put(message.getBytes());
 		AppData.flip();
 		
 		while(AppData.hasRemaining()) {
+				NetData.clear();
+				NetData.put(new byte[1024]);
 				NetData.clear();
 				SSLEngineResult result = engine.wrap(AppData,NetData);
 				switch(result.getStatus()) {
@@ -93,7 +95,7 @@ public class MessengerClient extends MessengerBasic{
 			recv(channel,engine);
 		}
 		//**수신 메소드**
-		protected void recv(SocketChannel channel, SSLEngine engine) throws IOException {
+	synchronized protected void recv(SocketChannel channel, SSLEngine engine) throws IOException {
 			NodeNetData.clear();
 			int waitToRecvMillis = 50;
 			
@@ -139,53 +141,22 @@ public class MessengerClient extends MessengerBasic{
 			executor.shutdown();
 			System.out.println("GoodBye");
 		}
-		public void login() throws IOException{
-				
-			System.out.println("--------------------------------------------------");
-			System.out.println("-           InstantSSLMessenger v1.0             -");
-			System.out.println("--------------------------------------------------");
-			System.out.print("- 사용할 닉네임을 입력하세요. : ");
-			Scanner scan = new Scanner(System.in);
-			nickName=scan.nextLine();
-			if(nickName.equals(""))
-				loginOk=false;
-			else 
-				loginOk=true;
-			send("nickName : ");
-			System.out.println("");
-		}
-		
-		public void checkCreateChatRoom() {
-			System.out.print("- 채팅방을 개설 하시겠습니까?(Y/N) : ");
-			Scanner scan = new Scanner(System.in);
-			checkCreateRoom=scan.nextLine();
-			if(checkCreateRoom.equals("Y")) {
-				//
-			     
-			}
-			else if(checkCreateRoom.equals("N")) {
-				System.out.println("--------------------------------------------------");
-				System.out.println("-                    채팅방 List                  -");
-				System.out.println("--------------------------------------------------");
-				
-				//
-				
-			}else {
-				checkCreateChatRoom();
-			}
-		}
+
 	
-		public static void main(String args[]) {
+		public void run(){
 			
 			try {
-				MessengerClient client = new MessengerClient("TLS","59.187.211.231",8500);
-				client.connect();
-				while(!loginOk) {
-					client.login();
+				connect();
+				MessengerClientReceiver receiver = new MessengerClientReceiver(this);
+				while(true) {
+					receiver.run();
+					System.out.print("입력  : ");
+					Scanner scan = new Scanner(System.in);
+					String msg = scan.nextLine();
+					//System.out.println("User : "+msg);
+					send(msg);
 				}
-			//
-			//
-			
+				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
