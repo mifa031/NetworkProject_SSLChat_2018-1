@@ -36,9 +36,9 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 		engine.setUseClientMode(true);
 		
 		SSLSession session = engine.getSession();
-		AppData = ByteBuffer.allocate(1024);
+		AppData = ByteBuffer.allocate(100);
 		NetData = ByteBuffer.allocate(session.getPacketBufferSize());
-		NodeAppData = ByteBuffer.allocate(1024);
+		NodeAppData = ByteBuffer.allocate(100);
 		NodeNetData = ByteBuffer.allocate(session.getPacketBufferSize());
 	}
 	//** 연결 부분 **
@@ -66,7 +66,7 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 		
 		while(AppData.hasRemaining()) {
 				NetData.clear();
-				NetData.put(new byte[100]);
+				NetData.put(new byte[30]);
 				NetData.clear();
 				SSLEngineResult result = engine.wrap(AppData,NetData);
 				switch(result.getStatus()) {
@@ -152,12 +152,12 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 				connect();
 				//MessengerClientReceiver receiver = new MessengerClientReceiver(this);
 				while(true) {
-					//receiver.run();
 					System.out.print("입력  : ");
 					Scanner scan = new Scanner(System.in);
 					String msg = scan.nextLine();
 					//System.out.println("User : "+msg);
 					send(msg);
+					//receiver.run();
 				}
 				
 			} catch (Exception e) {

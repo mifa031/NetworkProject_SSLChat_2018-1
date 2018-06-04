@@ -82,7 +82,7 @@ public class MessengerServer extends MessengerBasic{
 			while(NodeNetData.hasRemaining()) {
 				
 				NodeAppData.clear();
-				NodeAppData.put(new byte[100]);
+				NodeAppData.put(new byte[30]);
 			
 				NodeAppData.clear();
 				SSLEngineResult result = engine.unwrap(NodeNetData, NodeAppData);
@@ -91,7 +91,8 @@ public class MessengerServer extends MessengerBasic{
 				case OK:
 					//NodeAppData.flip();//제거 대상?
 					;
-					System.out.println("유저 이름 : "+new String(NodeAppData.array()));
+					String msg=new String(NodeAppData.array());
+					System.out.println("유저 이름 : "+msg);
 					//send(channel,engine,"InstantMessenger에 오신것을 환영합니다.");
 					send(channel,engine,new String(NodeAppData.array()));
 					break;
@@ -115,7 +116,7 @@ public class MessengerServer extends MessengerBasic{
 		}
 	}
 	//클라이언트로 메시지 전송
-	synchronized public void send(SocketChannel channel,SSLEngine engine,String m)throws IOException{
+	public void send(SocketChannel channel,SSLEngine engine,String m)throws IOException{
 		
 		AppData.clear();
 		AppData.put(m.getBytes());
@@ -153,7 +154,7 @@ public class MessengerServer extends MessengerBasic{
 		selector.wakeup();
 	}
 	//서버 구동
-	synchronized public void run() throws Exception{
+	 public void run() throws Exception{
 		System.out.println("InstantSSLMessenger Server를 구동합니다.");
 		
 		while(isActivated()) {
@@ -171,9 +172,7 @@ public class MessengerServer extends MessengerBasic{
 				if(k.isAcceptable()) {
 					accept(k);
 				}else if(k.isReadable()) {
-					NodeNetData.clear();
-					NodeNetData.put(new byte[1024]);
-					NodeNetData.clear();
+			
 					recv((SocketChannel) k.channel(),(SSLEngine) k.attachment());
 				}
 			}

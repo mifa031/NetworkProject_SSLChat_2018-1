@@ -12,7 +12,7 @@ public class MessengerClientReceiver implements Runnable {
 			
 	public void run() {
 		try {
-			client.recv();
+				client.recv();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
