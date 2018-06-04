@@ -72,7 +72,7 @@ public class MessengerServer extends MessengerBasic{
 		}
 	}
 	//클라이언트로 메시지 받음
-	synchronized protected void recv(SocketChannel channel,SSLEngine engine) throws IOException {
+	protected void recv(SocketChannel channel,SSLEngine engine) throws IOException {
 		NodeNetData.clear();
 		int byterecv = channel.read(NodeNetData);
 		
@@ -82,7 +82,8 @@ public class MessengerServer extends MessengerBasic{
 			while(NodeNetData.hasRemaining()) {
 				
 				NodeAppData.clear();
-				NodeAppData.put(new byte[1024]);
+				NodeAppData.put(new byte[100]);
+			
 				NodeAppData.clear();
 				SSLEngineResult result = engine.unwrap(NodeNetData, NodeAppData);
 				
@@ -133,6 +134,7 @@ public class MessengerServer extends MessengerBasic{
 				break;
 			case BUFFER_OVERFLOW:
 				NetData=enlargePacketBuffer(engine,NetData);
+				break;
 			case BUFFER_UNDERFLOW:
 				throw new SSLException("버퍼를 랩핑하고 난후에, 버퍼의 언더플로우가 발생했습니다.");
 			case CLOSED:

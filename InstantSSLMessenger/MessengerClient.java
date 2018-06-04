@@ -66,7 +66,7 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 		
 		while(AppData.hasRemaining()) {
 				NetData.clear();
-				NetData.put(new byte[1024]);
+				NetData.put(new byte[100]);
 				NetData.clear();
 				SSLEngineResult result = engine.wrap(AppData,NetData);
 				switch(result.getStatus()) {
@@ -74,6 +74,7 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 					NetData.flip();
 					while(NetData.hasRemaining()) {
 						channel.write(NetData);
+						
 					}
 					break;
 				case BUFFER_OVERFLOW:
@@ -114,8 +115,10 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 						break;
 					case BUFFER_OVERFLOW:
 						NodeAppData =enlargeAppBuffer(engine,NodeAppData);
+						break;
 					case BUFFER_UNDERFLOW:
 						NodeNetData = manageBufferUnderflow(engine,NodeNetData);
+						break;
 					case CLOSED:
 						closeConnection(channel,engine);
 						return;
@@ -147,9 +150,9 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 			
 			try {
 				connect();
-				MessengerClientReceiver receiver = new MessengerClientReceiver(this);
+				//MessengerClientReceiver receiver = new MessengerClientReceiver(this);
 				while(true) {
-					receiver.run();
+					//receiver.run();
 					System.out.print("입력  : ");
 					Scanner scan = new Scanner(System.in);
 					String msg = scan.nextLine();
