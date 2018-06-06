@@ -6,6 +6,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
+import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
@@ -30,10 +31,12 @@ public class MessengerServer extends MessengerBasic{
 	public MessengerServer(String protocol, String hostAddress, int portNumber) throws Exception {
 		
 		context=SSLContext.getInstance(protocol);
-		context.init(createKeyManagers("C:/Users/Mr.JANG/workspace/InstantSSLMessenger/bin/.keystore/SSLSocketServerKey","123456","123456"),createTrustManagers("C:/Users/Mr.JANG/workspace/InstantSSLMessenger/bin/.keystore/SSLSocketServerKey","123456"), new SecureRandom());
+		context.init(createKeyManagers("D:\\workspace\\180604_1\\bin\\.keystore\\SSLSocketServerKey\\","123456","123456"),createTrustManagers("D:\\workspace\\180604_1\\bin\\.keystore\\SSLSocketServerKey\\","123456"), new SecureRandom());
 		
 		//엔진상의 세션을 통하여, 넷상으로 보낼/받을 버퍼,앱상으로 보낼/받을 버퍼 사이즈 초기화
 		SSLSession session = context.createSSLEngine().getSession();
+		
+				
 		AppData=ByteBuffer.allocate(session.getApplicationBufferSize());
 		NetData=ByteBuffer.allocate(session.getPacketBufferSize());
 		NodeAppData=ByteBuffer.allocate(session.getApplicationBufferSize());
@@ -72,29 +75,28 @@ public class MessengerServer extends MessengerBasic{
 		}
 	}
 	//클라이언트로 메시지 받음
-	protected void recv(SocketChannel channel,SSLEngine engine) throws IOException {
+	synchronized protected void recv(SocketChannel channel,SSLEngine engine) throws IOException {
 		NodeNetData.clear();
 		int byterecv = channel.read(NodeNetData);
 		
 		if(byterecv > 0) {
 			NodeNetData.flip();
-			
 			while(NodeNetData.hasRemaining()) {
-				
-				NodeAppData.clear();
-				NodeAppData.put(new byte[30]);
-			
 				NodeAppData.clear();
 				SSLEngineResult result = engine.unwrap(NodeNetData, NodeAppData);
+				//NodeNetData.compact();
+				
 				
 				switch(result.getStatus()) {
 				case OK:
-					//NodeAppData.flip();//제거 대상?
-					;
-					String msg=new String(NodeAppData.array());
-					System.out.println("유저 이름 : "+msg);
+					NodeAppData.flip();//제거 대상?
+					//NodeAppData.compact();
+					//Charset charset = Charset.forName("UTF-8");
+					Charset charset = Charset.defaultCharset();
+					String aaa = charset.decode(NodeAppData).toString();
+					System.out.println("유저 이름 : "+aaa);
 					//send(channel,engine,"InstantMessenger에 오신것을 환영합니다.");
-					send(channel,engine,new String(NodeAppData.array()));
+					//send(channel,engine,new String(NodeAppData.array()));
 					break;
 				case BUFFER_OVERFLOW:
 					NodeAppData = enlargeAppBuffer(engine,NodeAppData);
@@ -116,7 +118,7 @@ public class MessengerServer extends MessengerBasic{
 		}
 	}
 	//클라이언트로 메시지 전송
-	public void send(SocketChannel channel,SSLEngine engine,String m)throws IOException{
+	synchronized public void send(SocketChannel channel,SSLEngine engine,String m)throws IOException{
 		
 		AppData.clear();
 		AppData.put(m.getBytes());
@@ -135,7 +137,6 @@ public class MessengerServer extends MessengerBasic{
 				break;
 			case BUFFER_OVERFLOW:
 				NetData=enlargePacketBuffer(engine,NetData);
-				break;
 			case BUFFER_UNDERFLOW:
 				throw new SSLException("버퍼를 랩핑하고 난후에, 버퍼의 언더플로우가 발생했습니다.");
 			case CLOSED:
@@ -154,7 +155,7 @@ public class MessengerServer extends MessengerBasic{
 		selector.wakeup();
 	}
 	//서버 구동
-	 public void run() throws Exception{
+	synchronized public void run() throws Exception{
 		System.out.println("InstantSSLMessenger Server를 구동합니다.");
 		
 		while(isActivated()) {
@@ -172,7 +173,6 @@ public class MessengerServer extends MessengerBasic{
 				if(k.isAcceptable()) {
 					accept(k);
 				}else if(k.isReadable()) {
-			
 					recv((SocketChannel) k.channel(),(SSLEngine) k.attachment());
 				}
 			}

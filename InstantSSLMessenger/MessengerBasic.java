@@ -61,6 +61,7 @@ public abstract class MessengerBasic {
 							}
 							break;
 						case BUFFER_OVERFLOW:
+							
 							NetData=enlargePacketBuffer(engine,NetData);
 							break;
 						case BUFFER_UNDERFLOW:
@@ -116,7 +117,7 @@ public abstract class MessengerBasic {
 						NodeNetData.compact(); 
 						hstatus =result.getHandshakeStatus();
 					}catch(SSLException s) {
-						//System.out.println("데이터 처리가 매끄럽지않아 정상적인 종료가 되지않았습니다. 서버를 정상적으로 종료합니다.");
+						System.out.println("데이터 처리가 매끄럽지않아 정상적인 종료가 되지않았습니다. 서버를 정상적으로 종료합니다.");
 						engine.closeOutbound();
 						hstatus=engine.getHandshakeStatus();
 						break;

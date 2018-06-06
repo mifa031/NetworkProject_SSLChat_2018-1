@@ -30,15 +30,16 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 		this.portNum = portNum;
 		
 		SSLContext context = SSLContext.getInstance(protocol);
-		context.init(createKeyManagers("C:/Users/Mr.JANG/workspace/InstantSSLMessenger/bin/.keystore/SSLSocketServerKey", "123456", "123456"), createTrustManagers("C:/Users/Mr.JANG/workspace/InstantSSLMessenger/bin/.keystore/SSLSocketServerKey", "123456"), new SecureRandom());
+		context.init(createKeyManagers("D:\\workspace\\180604_1\\bin\\.keystore\\SSLSocketServerKey\\", "123456", "123456"), createTrustManagers("D:\\workspace\\180604_1\\bin\\.keystore\\SSLSocketServerKey\\", "123456"), new SecureRandom());
 		
 		engine = context.createSSLEngine(remoteAddr,portNum);
 		engine.setUseClientMode(true);
 		
 		SSLSession session = engine.getSession();
-		AppData = ByteBuffer.allocate(100);
+		
+		AppData = ByteBuffer.allocate(1024);
 		NetData = ByteBuffer.allocate(session.getPacketBufferSize());
-		NodeAppData = ByteBuffer.allocate(100);
+		NodeAppData = ByteBuffer.allocate(1024);
 		NodeNetData = ByteBuffer.allocate(session.getPacketBufferSize());
 	}
 	//** 연결 부분 **
@@ -66,15 +67,12 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 		
 		while(AppData.hasRemaining()) {
 				NetData.clear();
-				NetData.put(new byte[30]);
-				NetData.clear();
 				SSLEngineResult result = engine.wrap(AppData,NetData);
 				switch(result.getStatus()) {
 				case OK:
 					NetData.flip();
 					while(NetData.hasRemaining()) {
 						channel.write(NetData);
-						
 					}
 					break;
 				case BUFFER_OVERFLOW:
@@ -115,10 +113,8 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 						break;
 					case BUFFER_OVERFLOW:
 						NodeAppData =enlargeAppBuffer(engine,NodeAppData);
-						break;
 					case BUFFER_UNDERFLOW:
 						NodeNetData = manageBufferUnderflow(engine,NodeNetData);
-						break;
 					case CLOSED:
 						closeConnection(channel,engine);
 						return;
@@ -152,12 +148,11 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 				connect();
 				//MessengerClientReceiver receiver = new MessengerClientReceiver(this);
 				while(true) {
+					//receiver.run();
 					System.out.print("입력  : ");
 					Scanner scan = new Scanner(System.in);
 					String msg = scan.nextLine();
-					//System.out.println("User : "+msg);
 					send(msg);
-					//receiver.run();
 				}
 				
 			} catch (Exception e) {
