@@ -24,15 +24,24 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 
 	private SSLEngine engine=null;
 	private SocketChannel channel=null;
-	
 	public MessengerServerReceiver(SSLEngine engine,SocketChannel channel) {
 		this.engine = engine;
 		this.channel =channel;
+		
+		SSLSession session = engine.getSession();
+		
+		AppData=ByteBuffer.allocate(session.getApplicationBufferSize());
+		NetData=ByteBuffer.allocate(session.getPacketBufferSize());
+		NodeAppData=ByteBuffer.allocate(session.getApplicationBufferSize());
+		NodeNetData=ByteBuffer.allocate(session.getPacketBufferSize());
+		
 	}
 
 	//클라이언트로 메시지 받음
 	synchronized protected void recv(SocketChannel channel,SSLEngine engine) throws IOException {
+		
 		NodeNetData.clear();
+		int waitToRecvMillis=50;
 		int byterecv = channel.read(NodeNetData);
 		
 		if(byterecv > 0) {
@@ -43,6 +52,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 				switch(result.getStatus()) {
 				case OK:
 					NodeAppData.flip();
+					
 					Charset charset = Charset.defaultCharset();
 					String message = charset.decode(NodeAppData).toString();
 					MessengerServerSender sender = new MessengerServerSender(engine,channel,message);
@@ -67,21 +77,23 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 			System.out.println("스트림의 종료로 클아이언트와 종료합니다.");
 			manageEndOfStream(channel,engine);
 		}
+		try {
+			Thread.sleep(waitToRecvMillis);
+		} catch (InterruptedException e) {
+			
+			e.printStackTrace();
+		}
 	}
+
 	
 	public void run() {
-		try {
-			while(!channel.finishConnect()) {
-				try {
-					recv(channel,engine);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		while(channel.isConnected()) {
+			try {
+				recv(channel,engine);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 	

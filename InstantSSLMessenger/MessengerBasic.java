@@ -16,7 +16,7 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
-public abstract class MessengerBasic {
+public class MessengerBasic {
 
 	protected ByteBuffer AppData; 
 	protected ByteBuffer NetData;

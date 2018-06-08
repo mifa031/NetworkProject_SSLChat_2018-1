@@ -1,10 +1,12 @@
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
 
 public class MessengerServerSender extends MessengerBasic implements Runnable {
 	//리시버 함수 x 센더 함수 o
@@ -16,6 +18,14 @@ public class MessengerServerSender extends MessengerBasic implements Runnable {
 		this.engine = engine;
 		this.channel = channel;
 		this.message = message;
+		
+		SSLSession session= engine.getSession();
+		
+		AppData=ByteBuffer.allocate(session.getApplicationBufferSize());
+		NetData=ByteBuffer.allocate(session.getPacketBufferSize());
+		NodeAppData=ByteBuffer.allocate(session.getApplicationBufferSize());
+		NodeNetData=ByteBuffer.allocate(session.getPacketBufferSize());
+	
 	}
 
 	//클라이언트로 메시지 전송
@@ -28,10 +38,11 @@ public class MessengerServerSender extends MessengerBasic implements Runnable {
 		while(AppData.hasRemaining()) {
 			NetData.clear();
 			SSLEngineResult result =engine.wrap(AppData,NetData);
-			switch(result.getStatus()) {
-			
+			switch(result.getStatus()) {     
 			case OK:
+		
 				NetData.flip();
+				
 				while(NetData.hasRemaining()) {
 					channel.write(NetData);
 				}

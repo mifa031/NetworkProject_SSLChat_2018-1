@@ -22,9 +22,9 @@ import java.util.Queue;
 
 public class MessengerServer extends MessengerBasic  {
 	//서버 스타트 함수
-	private boolean isActiveSvr;
-	private SSLContext context;
-	private Selector selector;
+	public boolean isActiveSvr;
+	public SSLContext context;
+	public Selector selector;
 	
 	public MessengerServer(String protocol, String hostAddress, int portNumber) throws Exception {
 		
@@ -33,8 +33,7 @@ public class MessengerServer extends MessengerBasic  {
 		
 		//엔진상의 세션을 통하여, 넷상으로 보낼/받을 버퍼,앱상으로 보낼/받을 버퍼 사이즈 초기화
 		SSLSession session = context.createSSLEngine().getSession();
-		
-				
+			
 		AppData=ByteBuffer.allocate(session.getApplicationBufferSize());
 		NetData=ByteBuffer.allocate(session.getPacketBufferSize());
 		NodeAppData=ByteBuffer.allocate(session.getApplicationBufferSize());
@@ -111,8 +110,11 @@ public class MessengerServer extends MessengerBasic  {
 	}
 	public static void main(String args[]) {
 		try {
+			
 			MessengerServer server = new MessengerServer("TLS","127.0.0.1",8500);
 			server.startServer();
+			
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

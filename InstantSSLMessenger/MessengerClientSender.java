@@ -43,6 +43,7 @@ public class MessengerClientSender extends MessengerBasic implements Runnable{
 		NetData = ByteBuffer.allocate(session.getPacketBufferSize());
 		NodeAppData = ByteBuffer.allocate(1024);
 		NodeNetData = ByteBuffer.allocate(session.getPacketBufferSize());
+		
 	}
 
 	//서버로 메시지 전송(껍데기)
@@ -55,7 +56,6 @@ public class MessengerClientSender extends MessengerBasic implements Runnable{
 		AppData.clear();
 		AppData.put(message.getBytes());
 		AppData.flip();
-		
 		while(AppData.hasRemaining()) {
 				NetData.clear();
 				SSLEngineResult result = engine.wrap(AppData,NetData);
@@ -64,6 +64,7 @@ public class MessengerClientSender extends MessengerBasic implements Runnable{
 					NetData.flip();
 					while(NetData.hasRemaining()) {
 						channel.write(NetData);
+						
 					}
 					break;
 				case BUFFER_OVERFLOW:
@@ -96,10 +97,11 @@ public class MessengerClientSender extends MessengerBasic implements Runnable{
 				Scanner scan = new Scanner(System.in);
 				String msg = scan.nextLine();
 				send(msg);
-
-				while(!channel.finishConnect()) {
+				while(channel.isConnected()) {
+					//지금 안찍힘.
 					msg = scan.nextLine();
 					send(msg);
+				
 				}
 				
 			} catch (Exception e) {

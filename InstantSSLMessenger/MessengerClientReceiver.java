@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.security.SecureRandom;
 
 import javax.net.ssl.SSLContext;
@@ -33,11 +34,12 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 		NetData = ByteBuffer.allocate(session.getPacketBufferSize());
 		NodeAppData = ByteBuffer.allocate(1024);
 		NodeNetData = ByteBuffer.allocate(session.getPacketBufferSize());
+		
 	}
 	
 	public void run() {
 		try {
-			while(!channel.finishConnect()) {
+			while(channel.isConnected()) {
 				recv();
 			}
 		} catch (IOException e) {
@@ -64,12 +66,16 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 				switch(result.getStatus()) {
 				case OK:
 					NodeAppData.flip();
-					System.out.println(new String(NodeAppData.array()));
+					Charset charset = Charset.defaultCharset();
+					String message = charset.decode(NodeAppData).toString();
+					System.out.println(message);
 					break;
 				case BUFFER_OVERFLOW:
 					NodeAppData =enlargeAppBuffer(engine,NodeAppData);
+			   
 				case BUFFER_UNDERFLOW:
 					NodeNetData = manageBufferUnderflow(engine,NodeNetData);
+					break;
 				case CLOSED:
 					closeConnection(channel,engine);
 					return;
