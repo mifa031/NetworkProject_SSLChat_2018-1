@@ -24,7 +24,7 @@ public class MessengerClientSender extends MessengerBasic implements Runnable{
 	private static String checkCreateRoom="";
 
 	//버퍼의 사이즈 설정 및 연결을 위한 준비.
-	public MessengerClientSender(String protocol, String remoteAddr, int portNum, SocketChannel channel, SSLEngine engine, SSLSession session) throws Exception{
+	public MessengerClientSender(String protocol, String remoteAddr, int portNum, SocketChannel channel, SSLEngine engine) throws Exception{
 		
 		this.remoteAddr = remoteAddr;
 		this.portNum = portNum;
@@ -37,7 +37,7 @@ public class MessengerClientSender extends MessengerBasic implements Runnable{
 		//engine = context.createSSLEngine(remoteAddr,portNum);
 		//engine.setUseClientMode(true);
 		
-		//SSLSession session = engine.getSession();
+		SSLSession session = engine.getSession();
 		
 		AppData = ByteBuffer.allocate(1024);
 		NetData = ByteBuffer.allocate(session.getPacketBufferSize());
