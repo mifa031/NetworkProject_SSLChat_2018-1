@@ -15,20 +15,20 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 	private static SSLEngine engine;
 	private static SocketChannel channel;
 	
-	public MessengerClientReceiver(String protocol, String remoteAddr, int portNum, SocketChannel channel, SSLEngine engine) throws Exception{
+	public MessengerClientReceiver(String protocol, String remoteAddr, int portNum, SocketChannel channel, SSLEngine engine, SSLSession session) throws Exception{
 		
 		this.remoteAddr = remoteAddr;
 		this.portNum = portNum;
 		this.channel = channel;
 		this.engine = engine;
 		
-		SSLContext context = SSLContext.getInstance(protocol);
-		context.init(createKeyManagers("C:\\Users\\Mr.JANG\\workspace\\InstantSSLMessenger\\bin\\.keystore\\SSLSocketServerKey\\", "123456", "123456"), createTrustManagers("C:\\Users\\Mr.JANG\\workspace\\InstantSSLMessenger\\bin\\.keystore\\SSLSocketServerKey\\", "123456"), new SecureRandom());
+		//SSLContext context = SSLContext.getInstance(protocol);
+		//context.init(createKeyManagers("D:\\workspace\\180604_1\\bin\\.keystore\\SSLSocketServerKey\\", "123456", "123456"), createTrustManagers("D:\\workspace\\180604_1\\bin\\.keystore\\SSLSocketServerKey\\", "123456"), new SecureRandom());
 		
-		engine = context.createSSLEngine(remoteAddr,portNum);
-		engine.setUseClientMode(true);
+		//engine = context.createSSLEngine(remoteAddr,portNum);
+		//engine.setUseClientMode(true);
 		
-		SSLSession session = engine.getSession();
+		//SSLSession session = engine.getSession();
 		
 		AppData = ByteBuffer.allocate(1024);
 		NetData = ByteBuffer.allocate(session.getPacketBufferSize());

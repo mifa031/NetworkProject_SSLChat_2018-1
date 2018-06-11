@@ -22,7 +22,7 @@ public class MessengerClient extends MessengerBasic{
 
 		MessengerClient client = new MessengerClient();
 		SSLContext context = SSLContext.getInstance(protocol);
-		context.init(client.createKeyManagers("C:\\Users\\Mr.JANG\\workspace\\InstantSSLMessenger\\bin\\.keystore\\SSLSocketServerKey\\", "123456", "123456"), client.createTrustManagers("C:\\Users\\Mr.JANG\\workspace\\InstantSSLMessenger\\bin\\.keystore\\SSLSocketServerKey\\", "123456"), new SecureRandom());
+		context.init(client.createKeyManagers("D:\\workspace\\180604_1\\bin\\.keystore\\SSLSocketServerKey\\", "123456", "123456"), client.createTrustManagers("D:\\workspace\\180604_1\\bin\\.keystore\\SSLSocketServerKey\\", "123456"), new SecureRandom());
 		engine = context.createSSLEngine(srvIP,srvPort);
 		engine.setUseClientMode(true);
 		SSLSession session = engine.getSession();
@@ -34,11 +34,11 @@ public class MessengerClient extends MessengerBasic{
 		
 		client.connect(srvIP, srvPort);
 		
-		MessengerClientReceiver receiver = new MessengerClientReceiver(protocol,srvIP,srvPort, channel, engine);
+		MessengerClientReceiver receiver = new MessengerClientReceiver(protocol,srvIP,srvPort, channel, engine, session);
 		Thread receiverThread = new Thread(receiver);
 		receiverThread.start();	
 		
-		MessengerClientSender sender = new MessengerClientSender(protocol,srvIP,srvPort, channel, engine);
+		MessengerClientSender sender = new MessengerClientSender(protocol,srvIP,srvPort, channel, engine, session);
 		Thread senderThread = new Thread(sender);
 		senderThread.start();
 		
