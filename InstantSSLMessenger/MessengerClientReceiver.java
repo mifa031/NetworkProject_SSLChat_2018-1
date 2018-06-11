@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
@@ -12,23 +13,17 @@ import javax.net.ssl.SSLSession;
 public class MessengerClientReceiver extends MessengerBasic implements Runnable {
 	private String remoteAddr;
 	private int portNum;
-	private static SSLEngine engine;
-	private static SocketChannel channel;
+	private static SSLEngine engine = null;
+	private static SocketChannel channel = null;
 	
-	public MessengerClientReceiver(String protocol, String remoteAddr, int portNum, SocketChannel channel, SSLEngine engine, SSLSession session) throws Exception{
+	public MessengerClientReceiver(String protocol, String remoteAddr, int portNum, SocketChannel channel, SSLEngine engine) throws Exception{
 		
 		this.remoteAddr = remoteAddr;
 		this.portNum = portNum;
 		this.channel = channel;
 		this.engine = engine;
 		
-		//SSLContext context = SSLContext.getInstance(protocol);
-		//context.init(createKeyManagers("D:\\workspace\\180604_1\\bin\\.keystore\\SSLSocketServerKey\\", "123456", "123456"), createTrustManagers("D:\\workspace\\180604_1\\bin\\.keystore\\SSLSocketServerKey\\", "123456"), new SecureRandom());
-		
-		//engine = context.createSSLEngine(remoteAddr,portNum);
-		//engine.setUseClientMode(true);
-		
-		//SSLSession session = engine.getSession();
+		SSLSession session = engine.getSession();
 		
 		AppData = ByteBuffer.allocate(1024);
 		NetData = ByteBuffer.allocate(session.getPacketBufferSize());
@@ -58,9 +53,8 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 		int byterecv = channel.read(NodeNetData);
 		if(byterecv > 0) {
 			NodeNetData.flip();
-			
 			while(NodeNetData.hasRemaining()) {
-				NodeNetData.clear();
+				System.out.println("unwrap");
 				SSLEngineResult result = engine.unwrap(NodeNetData, NodeAppData);
 				
 				switch(result.getStatus()) {
@@ -72,7 +66,7 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 					break;
 				case BUFFER_OVERFLOW:
 					NodeAppData =enlargeAppBuffer(engine,NodeAppData);
-			   
+					break;
 				case BUFFER_UNDERFLOW:
 					NodeNetData = manageBufferUnderflow(engine,NodeNetData);
 					break;
@@ -87,12 +81,12 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 			manageEndOfStream(channel,engine);
 			return;
 		}
-	
+	/*
 		try {
 			Thread.sleep(waitToRecvMillis);
 		} catch (InterruptedException e) {
 			
 			e.printStackTrace();
-		}
+		}*/
 	}
 }

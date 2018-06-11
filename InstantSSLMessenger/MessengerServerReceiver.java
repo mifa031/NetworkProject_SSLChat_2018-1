@@ -46,7 +46,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 		
 		if(byterecv > 0) {
 			NodeNetData.flip();
-			while(NodeNetData.hasRemaining()) {
+			//while(NodeNetData.hasRemaining()) {
 				NodeAppData.clear();
 				SSLEngineResult result = engine.unwrap(NodeNetData, NodeAppData);				
 				switch(result.getStatus()) {
@@ -55,6 +55,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 					
 					Charset charset = Charset.defaultCharset();
 					String message = charset.decode(NodeAppData).toString();
+					//System.out.println(message);
 					MessengerServerSender sender = new MessengerServerSender(engine,channel,message);
 					Thread st2 = new Thread(sender);
 					st2.start();
@@ -72,7 +73,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 				default:
 					throw new IllegalStateException("정의 되지않은 SSL엔진의 상태 : "+result.getStatus());
 				}
-			}
+			//}
 		}else if(byterecv < 0) {
 			System.out.println("스트림의 종료로 클아이언트와 종료합니다.");
 			manageEndOfStream(channel,engine);

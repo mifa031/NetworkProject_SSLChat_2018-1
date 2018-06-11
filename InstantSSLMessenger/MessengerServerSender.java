@@ -33,6 +33,7 @@ public class MessengerServerSender extends MessengerBasic implements Runnable {
 		
 		AppData.clear();
 		AppData.put(m.getBytes());
+		System.out.println(m);
 		AppData.flip();
 	
 		while(AppData.hasRemaining()) {

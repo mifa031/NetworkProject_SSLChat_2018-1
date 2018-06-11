@@ -29,7 +29,7 @@ public class MessengerServer extends MessengerBasic  {
 	public MessengerServer(String protocol, String hostAddress, int portNumber) throws Exception {
 		
 		context=SSLContext.getInstance(protocol);
-		context.init(createKeyManagers("C:\\Users\\Mr.JANG\\workspace\\InstantSSLMessenger\\bin\\.keystore\\SSLSocketServerKey\\","123456","123456"),createTrustManagers("C:\\Users\\Mr.JANG\\workspace\\InstantSSLMessenger\\bin\\.keystore\\SSLSocketServerKey\\","123456"), new SecureRandom());
+		context.init(createKeyManagers("D:\\workspace\\180608\\bin\\.keystore\\SSLSocketServerKey\\","123456","123456"),createTrustManagers("D:\\workspace\\180608\\bin\\.keystore\\SSLSocketServerKey\\","123456"), new SecureRandom());
 		
 		//엔진상의 세션을 통하여, 넷상으로 보낼/받을 버퍼,앱상으로 보낼/받을 버퍼 사이즈 초기화
 		SSLSession session = context.createSSLEngine().getSession();

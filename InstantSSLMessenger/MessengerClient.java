@@ -22,7 +22,7 @@ public class MessengerClient extends MessengerBasic{
 
 		MessengerClient client = new MessengerClient();
 		SSLContext context = SSLContext.getInstance(protocol);
-		context.init(client.createKeyManagers("D:\\workspace\\180604_1\\bin\\.keystore\\SSLSocketServerKey\\", "123456", "123456"), client.createTrustManagers("D:\\workspace\\180604_1\\bin\\.keystore\\SSLSocketServerKey\\", "123456"), new SecureRandom());
+		context.init(client.createKeyManagers("D:\\workspace\\180608\\bin\\.keystore\\SSLSocketServerKey\\", "123456", "123456"), client.createTrustManagers("D:\\workspace\\180608\\bin\\.keystore\\SSLSocketServerKey\\", "123456"), new SecureRandom());
 		engine = context.createSSLEngine(srvIP,srvPort);
 		engine.setUseClientMode(true);
 		SSLSession session = engine.getSession();
@@ -34,7 +34,7 @@ public class MessengerClient extends MessengerBasic{
 		
 		client.connect(srvIP, srvPort);
 		
-		MessengerClientReceiver receiver = new MessengerClientReceiver(protocol,srvIP,srvPort, channel, engine, session);
+		MessengerClientReceiver receiver = new MessengerClientReceiver(protocol,srvIP,srvPort, channel, engine);
 		Thread receiverThread = new Thread(receiver);
 		receiverThread.start();	
 		
