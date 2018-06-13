@@ -24,10 +24,11 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 
 	private SSLEngine engine=null;
 	private SocketChannel channel=null;
-	public MessengerServerReceiver(SSLEngine engine,SocketChannel channel) {
+	MessengerRoomUserInfo roomUserInfo=null;
+	public MessengerServerReceiver(SSLEngine engine,SocketChannel channel,MessengerRoomUserInfo roomUserInfo) {
 		this.engine = engine;
 		this.channel =channel;
-		
+		this.roomUserInfo=roomUserInfo;
 		SSLSession session = engine.getSession();
 		
 		AppData=ByteBuffer.allocate(session.getApplicationBufferSize());
@@ -56,9 +57,13 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 					Charset charset = Charset.defaultCharset();
 					String message = charset.decode(NodeAppData).toString();
 					//System.out.println(message);
-					MessengerServerSender sender = new MessengerServerSender(engine,channel,message);
-					Thread st2 = new Thread(sender);
-					st2.start();
+					
+					for(SelectionKey u : roomUserInfo.user) {
+						System.out.println(u);
+						MessengerServerSender sender = new MessengerServerSender(engine,u.channel(),message);
+						Thread st2 = new Thread(sender);
+						st2.start();
+					}
 					break;
 				case BUFFER_OVERFLOW:
 					NodeAppData = enlargeAppBuffer(engine,NodeAppData);
