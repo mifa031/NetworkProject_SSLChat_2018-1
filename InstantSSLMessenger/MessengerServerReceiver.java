@@ -25,7 +25,8 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 	private SSLEngine engine=null;
 	private SocketChannel channel=null;
 	MessengerRoomUserInfo roomUserInfo=null;
-	public MessengerServerReceiver(SSLEngine engine,SocketChannel channel,MessengerRoomUserInfo roomUserInfo) {
+	
+	public MessengerServerReceiver(SSLEngine engine,SocketChannel channel,MessengerRoomUserInfo roomUserInfo, Selector selector) {
 		this.engine = engine;
 		this.channel =channel;
 		this.roomUserInfo=roomUserInfo;
@@ -36,6 +37,9 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 		NodeAppData=ByteBuffer.allocate(session.getApplicationBufferSize());
 		NodeNetData=ByteBuffer.allocate(session.getPacketBufferSize());
 		
+		SelectionKey k = channel.keyFor(selector);
+		roomUserInfo.user.add(k);
+		System.out.print(k);
 	}
 
 	//클라이언트로 메시지 받음
@@ -59,8 +63,8 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 					//System.out.println(message);
 					
 					for(SelectionKey u : roomUserInfo.user) {
-						System.out.println(u);
-						MessengerServerSender sender = new MessengerServerSender(engine,u.channel(),message);
+						//System.out.println(u);
+						MessengerServerSender sender = new MessengerServerSender(engine,(SocketChannel) u.channel(),message);
 						Thread st2 = new Thread(sender);
 						st2.start();
 					}

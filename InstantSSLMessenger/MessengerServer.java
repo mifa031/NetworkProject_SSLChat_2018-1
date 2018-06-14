@@ -34,7 +34,7 @@ public class MessengerServer extends MessengerBasic  {
 		 roomUserInfo = new MessengerRoomUserInfo();
 		//roomUserInfo.room.add("a");
 		context=SSLContext.getInstance(protocol);
-		context.init(createKeyManagers("C:\\Users\\Mr.JANG\\workspace\\InstantSSLMessenger\\bin\\.keystore\\SSLSocketServerKey\\","123456","123456"),createTrustManagers("C:\\Users\\Mr.JANG\\workspace\\InstantSSLMessenger\\bin\\.keystore\\SSLSocketServerKey\\","123456"), new SecureRandom());
+		context.init(createKeyManagers(".\\.keystore\\SSLSocketServerKey\\","123456","123456"),createTrustManagers(".\\.keystore\\SSLSocketServerKey\\","123456"), new SecureRandom());
 		
 		//엔진상의 세션을 통하여, 넷상으로 보낼/받을 버퍼,앱상으로 보낼/받을 버퍼 사이즈 초기화
 		SSLSession session = context.createSSLEngine().getSession();
@@ -70,8 +70,9 @@ public class MessengerServer extends MessengerBasic  {
 		engine.beginHandshake();
 		System.out.println(channel.socket().getInetAddress()+" 에서 채팅서버에 입장했습니다.");
 		if(handshake(channel,engine)) {
-			channel.register(selector, SelectionKey.OP_READ, engine);	
-			MessengerServerReceiver receiver = new MessengerServerReceiver(engine,channel,roomUserInfo);
+			channel.register(selector, SelectionKey.OP_READ, engine);
+			
+			MessengerServerReceiver receiver = new MessengerServerReceiver(engine,channel,roomUserInfo, selector);
 			Thread st1 = new Thread(receiver);
 			st1.start();
 			
@@ -87,13 +88,12 @@ public class MessengerServer extends MessengerBasic  {
 		
 		while(isActivated()) {
 			selector.select(); // 준비된 오퍼레이션 셋의 키 넘버를 리턴.
-            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();//대기열
-			
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
 			while(selectedKeys.hasNext()) {
+				int a = 0;
 				SelectionKey k = selectedKeys.next();
 				selectedKeys.remove();
-				roomUserInfo.user.add(k);
-				
 				if(!k.isValid()) {
 					continue;
 				}
