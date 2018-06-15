@@ -25,7 +25,6 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 	private SSLEngine engine=null;
 	private SocketChannel channel=null;
 	MessengerRoomUserInfo roomUserInfo=null;
-	
 	public MessengerServerReceiver(SSLEngine engine,SocketChannel channel,MessengerRoomUserInfo roomUserInfo, Selector selector) {
 		this.engine = engine;
 		this.channel =channel;
@@ -38,8 +37,8 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 		NodeNetData=ByteBuffer.allocate(session.getPacketBufferSize());
 		
 		SelectionKey k = channel.keyFor(selector);
-		roomUserInfo.user.add(k);
-		System.out.print(k);
+		addUser("a",engine,k);
+		
 	}
 
 	//클라이언트로 메시지 받음
@@ -60,11 +59,9 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 					
 					Charset charset = Charset.defaultCharset();
 					String message = charset.decode(NodeAppData).toString();
-					//System.out.println(message);
-					
-					for(SelectionKey u : roomUserInfo.user) {
-						//System.out.println(u);
-						MessengerServerSender sender = new MessengerServerSender(engine,(SocketChannel) u.channel(),message);
+					message=message.trim();
+					for(UserInfo u : roomUserInfo.info) {
+						MessengerServerSender sender = new MessengerServerSender(u.engine,(SocketChannel) u.key.channel(),message);
 						Thread st2 = new Thread(sender);
 						st2.start();
 					}
@@ -94,7 +91,15 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 			e.printStackTrace();
 		}
 	}
-
+	public void addUser(String id,SSLEngine engine, SelectionKey key) {
+		UserInfo userInfo = new UserInfo();
+		userInfo.id=id;
+		userInfo.engine=engine;
+		userInfo.key=key;
+		
+		roomUserInfo.info.add(userInfo);
+		
+	}
 	
 	public void run() {
 		while(channel.isConnected()) {

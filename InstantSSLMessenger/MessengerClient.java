@@ -59,8 +59,7 @@ public class MessengerClient extends MessengerBasic{
 		channel = SocketChannel.open();//소켓 채널 생성
 		channel.configureBlocking(false); // 넌 블럭 IO 설정
 		channel.connect(new InetSocketAddress(srvIP,srvPort));//소켓채널 연결
-		
-		//System.out.println(channel.finishConnect());
+	
 		while(!channel.finishConnect()) { // 중요!!
 			
 		}

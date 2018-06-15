@@ -54,7 +54,6 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 		if(byterecv > 0) {
 			NodeNetData.flip();
 			while(NodeNetData.hasRemaining()) {
-				System.out.println("unwrap");
 				SSLEngineResult result = engine.unwrap(NodeNetData, NodeAppData);
 				
 				switch(result.getStatus()) {

@@ -30,12 +30,7 @@ public class MessengerClientSender extends MessengerBasic implements Runnable{
 		this.portNum = portNum;
 		this.channel = channel;
 		this.engine = engine;
-		
-		//SSLContext context = SSLContext.getInstance(protocol);
-		//context.init(createKeyManagers("D:\\workspace\\180604_1\\bin\\.keystore\\SSLSocketServerKey\\", "123456", "123456"), createTrustManagers("C:\\Users\\Mr.JANG\\workspace\\InstantSSLMessenger\\bin\\.keystore\\SSLSocketServerKey\\", "123456"), new SecureRandom());
-		
-		//engine = context.createSSLEngine(remoteAddr,portNum);
-		//engine.setUseClientMode(true);
+	
 		
 		SSLSession session = engine.getSession();
 		
