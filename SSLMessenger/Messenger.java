@@ -31,6 +31,8 @@ public class Messenger extends JFrame {
 	public JLabel roomNameLabel;
 	public MessengerClient client;
 	public String id;
+	public String ip;
+	public int port;
 	/**
 	 * Launch the application.
 	 */
@@ -41,9 +43,15 @@ public class Messenger extends JFrame {
 					
 					JFrame frame1 = new JFrame("Input your ID");
 				    String temp_id = JOptionPane.showInputDialog(frame1, "What's your name?");
-					
+				    /*JFrame frame2 = new JFrame("Input server IP");
+				    String temp_ip = JOptionPane.showInputDialog(frame1, "What's the server IP?");
+				    JFrame frame3 = new JFrame("Input server PORT");
+				    String temp_port = JOptionPane.showInputDialog(frame1, "What's the server PORT?");*/
+				    
 					Messenger frame = new Messenger();
 					frame.id = temp_id;
+					//frame.ip = temp_ip;
+					//frame.port = Integer.parseInt(temp_port);
 					frame.userNameLabel.setText(frame.id);
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -108,7 +116,7 @@ public class Messenger extends JFrame {
 		receivingTextArea.setEditable(false);
 		scrollPane.setViewportView(receivingTextArea);
 		
-		client = new MessengerClient(this);
+		client = new MessengerClient(ip, port, this);
 		Thread t = new Thread(client);
 		t.start();
 	}

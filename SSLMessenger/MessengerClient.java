@@ -26,8 +26,10 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 	public MessengerClientReceivedMsg recvMsg; 
 	Messenger frame;
 	
-	MessengerClient(Messenger frame){
+	MessengerClient(String srvIP, int srvPort, Messenger frame){
 		this.frame = frame;
+		this.srvIP = srvIP;
+		this.srvPort = srvPort;
 	}
 	
 	//** 연결 부분 **
