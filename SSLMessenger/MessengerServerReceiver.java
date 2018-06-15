@@ -28,7 +28,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 	private SocketChannel channel=null;
 	MessengerRoomUserInfo roomUserInfo=null;
 	private SelectionKey k=null;
-	
+	private UserInfo userInfo=null;
 	public MessengerServerReceiver(SSLEngine engine,SocketChannel channel,MessengerRoomUserInfo roomUserInfo, Selector selector) {
 		this.engine = engine;
 		this.channel =channel;
@@ -50,6 +50,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 		
 		NodeNetData.clear();
 		int waitToRecvMillis=50;
+	
 		int byterecv = channel.read(NodeNetData);
 		
 		if(byterecv > 0) {
@@ -64,11 +65,12 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 					Charset charset = Charset.defaultCharset();
 					String message = charset.decode(NodeAppData).toString();
 					String [] m_array=null;
-					String control_type=null;
-					
-					m_array=message.split("@");
-					control_type=m_array[1];
-					
+					String control_type="";
+				
+					if(message.charAt(0)=='@') {
+						m_array=message.split("@");
+						control_type=m_array[1];
+						
 					switch(control_type) {
 					
 						case "userinfo" :
@@ -77,13 +79,13 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 						case "chatroomlist" :
 							    getRoomList();
 							    break;
-						case "createroom" :
+						case "createchatroom" :
 							    addRoom(m_array[2]);
 							    break;
 						case "enterchatroom" :
 								for(UserInfo u : roomUserInfo.info) {
 									if(u.key==k) {
-											addRoomUser(u);
+											addRoomUser(u,m_array[2]);
 									}
 								}
 								break;								
@@ -91,15 +93,16 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 							for(UserInfo u : roomUserInfo.info) {
 								if(u.key==k) {
 											removeRoomUser(u);
+									}
 								}
-							}
-								break;				
-						default :
+								break;
+						}
+					}else {
 							for(UserInfo u:roomUserInfo.info) {
 								if(u.key==k) {
 									for(String roomname : roomUserInfo.room) {
-										if(u.roomname==roomname) {
-											broadcastRoomUser(roomname,m_array[1]);
+										if(u.roomname.equals(roomname)) {
+											broadcastRoomUser(roomname,message);
 										}else {
 											String alert_message="채팅방에 입장한 뒤에 메시지 입력이 가능합니다.";
 											send(channel,engine,alert_message);
@@ -107,9 +110,8 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 									}
 								}
 							}
-							    break;
 					}
-					break;
+					
 				case BUFFER_OVERFLOW:
 					NodeAppData = enlargeAppBuffer(engine,NodeAppData);
 					break;
@@ -134,29 +136,51 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 			
 			e.printStackTrace();
 		}
+	
 	}
 	public void addUser(String id,SSLEngine engine, SelectionKey key) {
-		UserInfo userInfo = new UserInfo();
+		
+		userInfo = new UserInfo();
 		userInfo.id=id;
 		userInfo.engine=engine;
 		userInfo.key=key;
-		
 		roomUserInfo.info.add(userInfo);
 		
 	}
 	//채팅방 추가
 	public void addRoom(String roomname) {
-		Vector<UserInfo> roomvector = new Vector<UserInfo>();
+			Vector<UserInfo> roomvector;
+	    if(roomUserInfo.map.get(roomname) == null)
+	    	roomvector = new Vector<UserInfo>();
+	    else
+	    	roomvector = roomUserInfo.map.get(roomname);
+		roomvector.add(userInfo);
 		roomUserInfo.map.put(roomname,roomvector);
+		roomUserInfo.room.add(roomname);
+		userInfo.roomname=roomname;
 	}
 	//채팅방 삭제
 	public void removeRoom(String roomname) {
 		roomUserInfo.map.remove(roomname);
 	}
 	//채팅방에 유저 추가
-	public void addRoomUser(UserInfo u) {
-		Vector<UserInfo> roomvector = roomUserInfo.map.get(u.roomname);
-		roomvector.add(u);
+	public void addRoomUser(UserInfo u,String roomname) {
+		u.roomname=roomname;
+		Vector<UserInfo> roomvector;
+		if(roomUserInfo.map.get(u.roomname)==null) {
+			String alert_message="입력하신 채팅방이 존재하지 않습니다.";
+			try {
+				send(channel,engine,alert_message);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else {
+			roomvector = roomUserInfo.map.get(u.roomname);
+			roomvector.add(u);
+			roomUserInfo.map.put(roomname,roomvector);
+		}
+		
 	}
 	//채팅방에서 유저 삭제
 	public void removeRoomUser(UserInfo u) {
@@ -169,10 +193,11 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 	//방 사용자에게 모두 메시지 전송
 	
 	public void broadcastRoomUser(String roomname,String message) {
+		String buffer = userInfo.id+" : "+message;
 		if(roomUserInfo.map.get(roomname)!=null) {
 			Vector<UserInfo> roomvector = roomUserInfo.map.get(roomname);
 			for(UserInfo u : roomvector) {
-				MessengerServerSender sender = new MessengerServerSender(u.engine,(SocketChannel) u.key.channel(),message);
+				MessengerServerSender sender = new MessengerServerSender(u.engine,(SocketChannel) u.key.channel(),buffer);
 				Thread st2 = new Thread(sender);
 				st2.start();
 			}

@@ -41,15 +41,15 @@ public class Messenger extends JFrame {
 			public void run() {
 				try {
 					
-					JFrame frame1 = new JFrame("Input your ID");
-				    String temp_id = JOptionPane.showInputDialog(frame1, "What's your name?");
+					//JFrame frame1 = new JFrame("Input your ID");
+				   // String temp_id = JOptionPane.showInputDialog(frame1, "What's your name?");
 				    /*JFrame frame2 = new JFrame("Input server IP");
 				    String temp_ip = JOptionPane.showInputDialog(frame1, "What's the server IP?");
 				    JFrame frame3 = new JFrame("Input server PORT");
 				    String temp_port = JOptionPane.showInputDialog(frame1, "What's the server PORT?");*/
 				    
 					Messenger frame = new Messenger();
-					frame.id = temp_id;
+					//frame.id = temp_id;
 					//frame.ip = temp_ip;
 					//frame.port = Integer.parseInt(temp_port);
 					frame.userNameLabel.setText(frame.id);
