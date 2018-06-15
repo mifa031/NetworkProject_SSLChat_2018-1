@@ -10,6 +10,7 @@ import javax.swing.JTextPane;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import java.awt.Font;
 import java.awt.event.ActionListener;
@@ -26,7 +27,10 @@ public class Messenger extends JFrame {
 	public JTextField sendingTextField;
 	public JTextArea receivingTextArea;
 	public JButton btnSendButton;
+	public JLabel userNameLabel;
+	public JLabel roomNameLabel;
 	public MessengerClient client;
+	public String id;
 	/**
 	 * Launch the application.
 	 */
@@ -34,7 +38,13 @@ public class Messenger extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					
+					JFrame frame1 = new JFrame("Input your ID");
+				    String temp_id = JOptionPane.showInputDialog(frame1, "What's your name?");
+					
 					Messenger frame = new Messenger();
+					frame.id = temp_id;
+					frame.userNameLabel.setText(frame.id);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -76,13 +86,13 @@ public class Messenger extends JFrame {
 		});
 		contentPane.add(btnSendButton);
 		
-		JLabel roomNameLabel = new JLabel("room name");
+		roomNameLabel = new JLabel("room name");
 		roomNameLabel.setBounds(12, 0, 217, 31);
 		roomNameLabel.setFont(new Font("굴림", Font.BOLD, 13));
 		roomNameLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		contentPane.add(roomNameLabel);
 		
-		JLabel userNameLabel = new JLabel("user name");
+		userNameLabel = new JLabel("user name");
 		userNameLabel.setBounds(228, 0, 217, 31);
 		userNameLabel.setFont(new Font("굴림", Font.BOLD, 13));
 		userNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
