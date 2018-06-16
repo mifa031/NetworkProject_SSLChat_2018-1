@@ -29,10 +29,11 @@ public class Messenger extends JFrame {
 	public JButton btnSendButton;
 	public JLabel userNameLabel;
 	public JLabel roomNameLabel;
-	public MessengerClient client;
+	public static MessengerClient client;
 	public String id;
 	public String ip;
 	public int port;
+	public static Messenger frame;
 	/**
 	 * Launch the application.
 	 */
@@ -41,24 +42,35 @@ public class Messenger extends JFrame {
 			public void run() {
 				try {
 					
-					//JFrame frame1 = new JFrame("Input your ID");
-				   // String temp_id = JOptionPane.showInputDialog(frame1, "What's your name?");
-				    /*JFrame frame2 = new JFrame("Input server IP");
+					JFrame frame1 = new JFrame("Input your ID");
+				    String temp_id = JOptionPane.showInputDialog(frame1, "What's your name?");
+				    JFrame frame2 = new JFrame("Input server IP");
 				    String temp_ip = JOptionPane.showInputDialog(frame1, "What's the server IP?");
-				    JFrame frame3 = new JFrame("Input server PORT");
-				    String temp_port = JOptionPane.showInputDialog(frame1, "What's the server PORT?");*/
-				    
-					Messenger frame = new Messenger();
-					//frame.id = temp_id;
-					//frame.ip = temp_ip;
-					//frame.port = Integer.parseInt(temp_port);
-					frame.userNameLabel.setText(frame.id);
+				   
+					frame = new Messenger();
+					frame.id = temp_id;
+					frame.ip = temp_ip;
+					
 					frame.setVisible(true);
+					
+					client = new MessengerClient(frame.ip, 8500, frame);
+					Thread t = new Thread(client);
+					t.start();
+					
+					String idInfo="@userinfo@"+frame.id;
+					System.out.println(idInfo);
+					client.recvMsg.msg=idInfo;
+					MessengerClientSender sender;
+				
+					sender = new MessengerClientSender(client.protocol,client.srvIP,8500, client.channel, client.engine,client.recvMsg, client.frame);
+					Thread senderThread = new Thread(sender);
+					senderThread.start();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
+
 	}
 
 	/**
@@ -84,7 +96,7 @@ public class Messenger extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				MessengerClientSender sender;
 				try {
-					sender = new MessengerClientSender(client.protocol,client.srvIP,client.srvPort, client.channel, client.engine, client.recvMsg, client.frame);
+					sender = new MessengerClientSender(client.protocol,client.srvIP,8500, client.channel, client.engine, client.recvMsg, client.frame);
 					Thread senderThread = new Thread(sender);
 					senderThread.start();
 				} catch (Exception e) {
@@ -116,8 +128,9 @@ public class Messenger extends JFrame {
 		receivingTextArea.setEditable(false);
 		scrollPane.setViewportView(receivingTextArea);
 		
-		client = new MessengerClient(ip, port, this);
-		Thread t = new Thread(client);
-		t.start();
+		//client = new MessengerClient(frame.id, 8500, this);
+		//Thread t = new Thread(client);
+		//t.start();
+	
 	}
 }

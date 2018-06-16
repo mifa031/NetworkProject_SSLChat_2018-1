@@ -29,6 +29,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 	MessengerRoomUserInfo roomUserInfo=null;
 	private SelectionKey k=null;
 	private UserInfo userInfo=null;
+	SSLEngineResult result;
 	public MessengerServerReceiver(SSLEngine engine,SocketChannel channel,MessengerRoomUserInfo roomUserInfo, Selector selector) {
 		this.engine = engine;
 		this.channel =channel;
@@ -46,18 +47,18 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 	}
 
 	//클라이언트로 메시지 받음
-	synchronized protected void recv(SocketChannel channel,SSLEngine engine) throws IOException {
+	synchronized protected void recv(SocketChannel channel,SSLEngine engine) throws Exception {
 		
 		NodeNetData.clear();
 		int waitToRecvMillis=50;
-	
-		int byterecv = channel.read(NodeNetData);
+		try {
+	    int byterecv = channel.read(NodeNetData);
 		
 		if(byterecv > 0) {
 			NodeNetData.flip();
 			while(NodeNetData.hasRemaining()) {
 				NodeAppData.clear();
-				SSLEngineResult result = engine.unwrap(NodeNetData, NodeAppData);				
+			    result = engine.unwrap(NodeNetData, NodeAppData);				
 				switch(result.getStatus()) {
 				case OK:
 					NodeAppData.flip();
@@ -81,17 +82,57 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 							    break;
 						case "createchatroom" :
 							    addRoom(m_array[2]);
+							    for(UserInfo u : roomUserInfo.info) {
+									if(u.key==k) {
+										String sm="-------------------------\r\n"+
+												  "-    "+u.id+" 님이 채팅방을 개설하셨습니다.     -\r\n"+
+												  "------------------------------------------------------\r\n";
+											for(UserInfo user:roomUserInfo.info) {
+													if(user.key==k) {
+															for(String r : roomUserInfo.room) {
+																if(user.roomname.equals(r)) {
+																	broadcastRoomSystem(r,sm);
+																}
+															}
+													}
+											}
+									}
+							    }
 							    break;
 						case "enterchatroom" :
 								for(UserInfo u : roomUserInfo.info) {
 									if(u.key==k) {
 											addRoomUser(u,m_array[2]);
+											String sm2="-------------------------\r\n"+
+													  "-    "+u.id+" 님이 채팅방에 입장하셨습니다.    -\r\n"+
+													  "------------------------------------------------------\r\n";
+												for(UserInfo user:roomUserInfo.info) {
+													if(user.key==k) {
+														for(String r : roomUserInfo.room) {
+															if(user.roomname.equals(r)) {
+																broadcastRoomSystem(r,sm2);
+															}
+														}
+													}
+												}
 									}
 								}
 								break;								
 						case "exitchatroom" :
 							for(UserInfo u : roomUserInfo.info) {
 								if(u.key==k) {
+											String sm3="-------------------------\r\n"+
+													  "-    "+u.id+" 님이 채팅방에서 퇴장하셨습니다.     -\r\n"+
+													  "------------------------------------------------------\r\n";
+											for(UserInfo user:roomUserInfo.info) {
+												if(user.key==k) {
+													for(String r : roomUserInfo.room) {
+														if(user.roomname.equals(r)) {
+															broadcastRoomSystem(r,sm3);
+														}
+													}
+												}
+											}
 											removeRoomUser(u);
 									}
 								}
@@ -121,21 +162,26 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 				case CLOSED:
 					System.out.println("클라이언트 쪽의 종료 요청으로, 채팅 서버를 종료합니다.");
 					closeConnection(channel,engine);
-					return;
+					break;
 				default:
 					throw new IllegalStateException("정의 되지않은 SSL엔진의 상태 : "+result.getStatus());
+					
 				}
 			}
 		}else if(byterecv < 0) {
 			System.out.println("스트림의 종료로 클아이언트와 종료합니다.");
 			manageEndOfStream(channel,engine);
 		}
+		
 		try {
 			Thread.sleep(waitToRecvMillis);
 		} catch (InterruptedException e) {
 			
 			e.printStackTrace();
 		}
+	  }catch(IOException e) {
+		  channel.finishConnect();
+	  }
 	
 	}
 	public void addUser(String id,SSLEngine engine, SelectionKey key) {
@@ -168,13 +214,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 		u.roomname=roomname;
 		Vector<UserInfo> roomvector;
 		if(roomUserInfo.map.get(u.roomname)==null) {
-			String alert_message="입력하신 채팅방이 존재하지 않습니다.";
-			try {
-				send(channel,engine,alert_message);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 		}else {
 			roomvector = roomUserInfo.map.get(u.roomname);
 			roomvector.add(u);
@@ -186,14 +226,27 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 	public void removeRoomUser(UserInfo u) {
 		Vector<UserInfo> roomvector = roomUserInfo.map.get(u.roomname);
 		roomvector.remove(u);
+		u.roomname=null;
 		if(roomvector.size()==0) {
 			removeRoom(u.roomname);
 		}
+		
 	}
 	//방 사용자에게 모두 메시지 전송
 	
 	public void broadcastRoomUser(String roomname,String message) {
-		String buffer = userInfo.id+" : "+message;
+		String buffer = "<"+userInfo.id+"> : "+message;
+		if(roomUserInfo.map.get(roomname)!=null) {
+			Vector<UserInfo> roomvector = roomUserInfo.map.get(roomname);
+			for(UserInfo u : roomvector) {
+				MessengerServerSender sender = new MessengerServerSender(u.engine,(SocketChannel) u.key.channel(),buffer);
+				Thread st2 = new Thread(sender);
+				st2.start();
+			}
+		}
+	}
+	public void broadcastRoomSystem(String roomname,String message) {
+		String buffer = "<System Message> : "+message;
 		if(roomUserInfo.map.get(roomname)!=null) {
 			Vector<UserInfo> roomvector = roomUserInfo.map.get(roomname);
 			for(UserInfo u : roomvector) {
@@ -206,7 +259,9 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 	//채팅방 리스트 얻어오기
 	public void getRoomList() {
 		Set<String> set = roomUserInfo.map.keySet();
-		String roomlist="--개설된 채팅방 목록--\r\n";
+		String roomlist="------------------------------------------------------\r\n"+
+				  "-             개설된 채팅방 목록                      -\r\n"+
+				  "------------------------------------------------------\r\n";
 		for(String roomname : set) {
 			roomlist+=" "+roomname+"\r\n";
 		}
@@ -219,7 +274,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 		while(channel.isConnected()) {
 			try {
 				recv(channel,engine);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

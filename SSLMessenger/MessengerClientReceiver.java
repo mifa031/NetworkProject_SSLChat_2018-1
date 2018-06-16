@@ -40,16 +40,16 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 			while(channel.isConnected()) {
 				recv();
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void recv() throws IOException{
+	public void recv() throws Exception{
 		recv(channel,engine);
 	}
 	//**수신 메소드**
-	synchronized protected void recv(SocketChannel channel, SSLEngine engine) throws IOException {
+	synchronized protected void recv(SocketChannel channel, SSLEngine engine) throws Exception {
 		
 		NodeNetData.clear();
 		int waitToRecvMillis = 50;

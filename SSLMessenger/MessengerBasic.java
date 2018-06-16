@@ -25,8 +25,8 @@ public class MessengerBasic {
 	protected ByteBuffer NodeNetData;
 	protected ExecutorService executor =Executors.newFixedThreadPool(10);
 	
-	protected  void recv(SocketChannel channel, SSLEngine engine) throws IOException{};
-	protected  void send(SocketChannel channel, SSLEngine engine, String message) throws IOException{};
+	protected  void recv(SocketChannel channel, SSLEngine engine) throws Exception{};
+	protected  void send(SocketChannel channel, SSLEngine engine, String message) throws Exception{};
 
 	protected boolean handshake(SocketChannel channel, SSLEngine engine) throws IOException{
 		SSLEngineResult result;
@@ -66,7 +66,7 @@ public class MessengerBasic {
 							NetData=enlargePacketBuffer(engine,NetData);
 							break;
 						case BUFFER_UNDERFLOW:
-							throw new SSLException("버퍼의 랩핑후에 버퍼의 언더플로우가 발생했습니다.");
+							throw new SSLException("버러 랩핑후에 언더플로우가 발생하였습니다.");
 						case CLOSED:
 							try {
 								NetData.flip();
@@ -75,13 +75,13 @@ public class MessengerBasic {
 								}
 								NodeNetData.clear();
 							}catch(Exception e) {
-								System.out.println("소켓 채널의 문제로, 서버의 종료 메시지를 보내지 못하였습니다.");
+								System.out.println("소켓 채널의 문제로 서버 종료 메시지를 보내지 못했습니다.");
 								hstatus=engine.getHandshakeStatus();
 							}
 							break;
 						
 					default:
-						throw new IllegalStateException("정의 되지않은 SSL엔진의 상태 : "+result.getStatus());
+						throw new IllegalStateException("정의 되지않은 SSLEngine의 상태 : "+result.getStatus());
 					}
                 break;
 				case NEED_TASK:       //Task가 존재 할때
@@ -105,7 +105,7 @@ public class MessengerBasic {
 						try {
 							engine.closeInbound();//인바운드 닫음
 						}catch(SSLException s) {
-							System.out.println("스트림의 종료로,인바운드를 닫습니다.");
+							System.out.println("close.");
 						}
 							engine.closeOutbound();//아웃바운드 닫음.
 							
@@ -118,7 +118,7 @@ public class MessengerBasic {
 						NodeNetData.compact(); 
 						hstatus =result.getHandshakeStatus();
 					}catch(SSLException s) {
-						System.out.println("데이터 처리가 매끄럽지않아 정상적인 종료가 되지않았습니다. 서버를 정상적으로 종료합니다.");
+						System.out.println("데이터 처리가 매끄럽지 않아 서버를 종료합니다.");
 						engine.closeOutbound();
 						hstatus=engine.getHandshakeStatus();
 						break;

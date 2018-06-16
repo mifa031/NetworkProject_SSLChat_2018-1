@@ -46,12 +46,12 @@ public class MessengerClientSender extends MessengerBasic implements Runnable{
 	}
 
 	//서버로 메시지 전송(껍데기)
-	public void send(String message) throws IOException{
+	public void send(String message) throws Exception{
 		send(channel,engine,message);	
 	}
 	//**send 부분**
 	// 버퍼를 생성->랩핑->랩핑한 버퍼를 체널에 써서, send!
- synchronized protected void send(SocketChannel channel,SSLEngine engine,String message) throws IOException {
+ synchronized protected void send(SocketChannel channel,SSLEngine engine,String message) throws Exception {
 		AppData.clear();
 		AppData.put(message.getBytes());
 		AppData.flip();
@@ -91,13 +91,11 @@ public class MessengerClientSender extends MessengerBasic implements Runnable{
 		public void run(){			
 			try {
 				
-				//while(channel.isConnected()) {
 					if(frame.sendingTextField.getText() !=null || !frame.sendingTextField.getText().equals("")) {
 						String msg = frame.sendingTextField.getText();
 						send(msg);
 						frame.sendingTextField.setText("");
 					}
-				//}
 				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

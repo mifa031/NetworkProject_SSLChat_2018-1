@@ -98,8 +98,7 @@ public class MessengerServer extends MessengerBasic  {
 				
 				if(k.isAcceptable()) {
 					accept(k);
-				}else if(k.isReadable()) {
-					
+				}else if(k.isReadable()) {	
 					recv((SocketChannel) k.channel(),(SSLEngine) k.attachment());
 				}
 				

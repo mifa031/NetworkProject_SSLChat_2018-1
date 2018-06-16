@@ -24,6 +24,4 @@ public class MessengerRoomUserInfo {
 		map  = new HashMap<String,Vector<UserInfo>>();		
 	}
 	
-
-	
 }
