@@ -80,7 +80,7 @@ public class Messenger extends JFrame {
 						e.printStackTrace();
 					}
 	            }
-	        });
+	     });
 	}
 
 	/**
@@ -136,6 +136,8 @@ public class Messenger extends JFrame {
 		
 		receivingTextArea = new JTextArea();
 		receivingTextArea.setEditable(false);
+		receivingTextArea.setLineWrap(true);
+		receivingTextArea.setWrapStyleWord(true);
 		scrollPane.setViewportView(receivingTextArea);
 		
 		//client = new MessengerClient(frame.id, 8500, this);
