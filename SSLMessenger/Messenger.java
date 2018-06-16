@@ -29,7 +29,6 @@ public class Messenger extends JFrame {
 	public JTextArea receivingTextArea;
 	public JButton btnSendButton;
 	public JLabel userNameLabel;
-	public JLabel roomNameLabel;
 	public static MessengerClient client;
 	public String id;
 	public String ip;
@@ -50,6 +49,7 @@ public class Messenger extends JFrame {
 				   
 					frame = new Messenger();
 					frame.id = temp_id;
+					frame.userNameLabel.setText(temp_id);
 					frame.ip = temp_ip;
 					
 					frame.setVisible(true);
@@ -116,12 +116,6 @@ public class Messenger extends JFrame {
 		});
 		contentPane.add(btnSendButton);
 		
-		roomNameLabel = new JLabel("room name");
-		roomNameLabel.setBounds(12, 0, 217, 31);
-		roomNameLabel.setFont(new Font("굴림", Font.BOLD, 13));
-		roomNameLabel.setHorizontalAlignment(SwingConstants.LEFT);
-		contentPane.add(roomNameLabel);
-		
 		userNameLabel = new JLabel("user name");
 		userNameLabel.setBounds(228, 0, 217, 31);
 		userNameLabel.setFont(new Font("굴림", Font.BOLD, 13));
@@ -139,10 +133,5 @@ public class Messenger extends JFrame {
 		receivingTextArea.setLineWrap(true);
 		receivingTextArea.setWrapStyleWord(true);
 		scrollPane.setViewportView(receivingTextArea);
-		
-		//client = new MessengerClient(frame.id, 8500, this);
-		//Thread t = new Thread(client);
-		//t.start();
-	
 	}
 }
