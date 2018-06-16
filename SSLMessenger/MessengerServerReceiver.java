@@ -30,6 +30,8 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 	private SelectionKey k=null;
 	private UserInfo userInfo=null;
 	SSLEngineResult result;
+	boolean isClosed=false;
+	
 	public MessengerServerReceiver(SSLEngine engine,SocketChannel channel,MessengerRoomUserInfo roomUserInfo, Selector selector) {
 		this.engine = engine;
 		this.channel =channel;
@@ -42,8 +44,6 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 		NodeNetData=ByteBuffer.allocate(session.getPacketBufferSize());
 		
 		k = channel.keyFor(selector);
-		
-		
 	}
 
 	//클라이언트로 메시지 받음
@@ -56,9 +56,10 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 		
 		if(byterecv > 0) {
 			NodeNetData.flip();
-			while(NodeNetData.hasRemaining()) {
+			while(NodeNetData.hasRemaining() && !isClosed) {
 				NodeAppData.clear();
-			    result = engine.unwrap(NodeNetData, NodeAppData);				
+			    result = engine.unwrap(NodeNetData, NodeAppData);
+			    System.out.println(result.getStatus());
 				switch(result.getStatus()) {
 				case OK:
 					NodeAppData.flip();
@@ -160,6 +161,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 					NodeNetData = manageBufferUnderflow(engine,NodeNetData);
 					break;
 				case CLOSED:
+					isClosed = true;
 					System.out.println("클라이언트 쪽의 종료 요청으로, 채팅 서버를 종료합니다.");
 					closeConnection(channel,engine);
 					break;
@@ -271,7 +273,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 	}
 
 	public void run() {
-		while(channel.isConnected()) {
+		while(!isClosed) {
 			try {
 				recv(channel,engine);
 			} catch (Exception e) {

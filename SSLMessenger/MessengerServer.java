@@ -44,7 +44,6 @@ public class MessengerServer extends MessengerBasic  {
 		NodeNetData=ByteBuffer.allocate(session.getPacketBufferSize());
 		session.invalidate();
 		
-		
 		//실렉터 프로바이더로 실렉터 생성과 초기화
 		selector=SelectorProvider.provider().openSelector();
 		ServerSocketChannel channel = ServerSocketChannel.open(); 
@@ -115,12 +114,9 @@ public class MessengerServer extends MessengerBasic  {
 	}
 	
 	public static void main(String args[]) {
-		try {
-			
+		try {		
 			MessengerServer server = new MessengerServer("TLS","127.0.0.1",8500);
 			server.startServer();
-			
-			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

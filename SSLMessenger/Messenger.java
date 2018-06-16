@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextArea;
 import java.awt.Color;
@@ -64,12 +65,22 @@ public class Messenger extends JFrame {
 					sender = new MessengerClientSender(client.protocol,client.srvIP,8500, client.channel, client.engine, client.recvMsg, client.frame);
 					Thread senderThread = new Thread(sender);
 					senderThread.start();
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
-
+		
+		 Runtime.getRuntime().addShutdownHook(new Thread() {
+	            public void run() {
+	                try {
+						client.closeConnection(client.channel, client.engine);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+	            }
+	        });
 	}
 
 	/**

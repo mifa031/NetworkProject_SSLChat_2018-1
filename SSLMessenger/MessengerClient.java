@@ -1,4 +1,5 @@
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -75,13 +76,11 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 		try {	
 			MessengerClientReceiver receiver = new MessengerClientReceiver(protocol,srvIP,srvPort, channel, engine, recvMsg, frame);
 			Thread receiverThread = new Thread(receiver);
-			receiverThread.start();	
-			
-			//MessengerClientSender sender = new MessengerClientSender(protocol,srvIP,srvPort, channel, engine, recvMsg, frame);
-			//Thread senderThread = new Thread(sender);
-			//senderThread.start();
+			receiverThread.start();
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
+		
+		
 	}
 }

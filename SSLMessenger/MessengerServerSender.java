@@ -26,7 +26,6 @@ public class MessengerServerSender extends MessengerBasic implements Runnable {
 		NetData=ByteBuffer.allocate(session.getPacketBufferSize());
 		NodeAppData=ByteBuffer.allocate(session.getApplicationBufferSize());
 		NodeNetData=ByteBuffer.allocate(session.getPacketBufferSize());
-	
 	}
 
 	//클라이언트로 메시지 전송
@@ -64,10 +63,8 @@ public class MessengerServerSender extends MessengerBasic implements Runnable {
 		try {
 			send(channel,engine,message);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
 
 }

@@ -17,6 +17,7 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 	private static SocketChannel channel = null;
 	private MessengerClientReceivedMsg recvMsg; 
 	private Messenger frame;
+	boolean isClosed = false;
 	
 	public MessengerClientReceiver(String protocol, String remoteAddr, int portNum, SocketChannel channel, SSLEngine engine, MessengerClientReceivedMsg recvMsg, Messenger frame) throws Exception{
 		
@@ -37,14 +38,13 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 	
 	public void run() {
 		try {
-			while(channel.isConnected()) {
+			while(!isClosed) {
 				recv();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
 	public void recv() throws Exception{
 		recv(channel,engine);
 	}
@@ -57,7 +57,7 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 		int byterecv = channel.read(NodeNetData);
 		if(byterecv > 0) {
 			NodeNetData.flip();
-			while(NodeNetData.hasRemaining()) {
+			while(NodeNetData.hasRemaining() && !isClosed) {
 				SSLEngineResult result = engine.unwrap(NodeNetData, NodeAppData);
 				
 				switch(result.getStatus()) {
@@ -66,8 +66,6 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 					Charset charset = Charset.defaultCharset();
 					recvMsg.msg = charset.decode(NodeAppData).toString();
 					frame.receivingTextArea.append(recvMsg.msg+"\n");
-					//String message = charset.decode(NodeAppData).toString();
-					//System.out.println(message);
 					break;
 				case BUFFER_OVERFLOW:
 					NodeAppData =enlargeAppBuffer(engine,NodeAppData);
@@ -76,6 +74,7 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 					NodeNetData = manageBufferUnderflow(engine,NodeNetData);
 					break;
 				case CLOSED:
+					isClosed = true;
 					closeConnection(channel,engine);
 					return;
 				default:
