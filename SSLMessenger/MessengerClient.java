@@ -21,7 +21,7 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 	public static String protocol = "TLS";
 	public static SSLEngine engine;
 	public static SocketChannel channel;
-	public static String srvIP;
+	public String srvIP;
 	public static int srvPort;
 	public MessengerClientReceivedMsg recvMsg; 
 	Messenger frame;
@@ -30,6 +30,26 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 		this.frame = frame;
 		this.srvIP = srvIP;
 		this.srvPort = srvPort;
+		recvMsg = new MessengerClientReceivedMsg();
+		try {
+			// 클라이언트는 인증서를 서버에서 받아오므로 default context, engine 생성
+			TrustManager[] trustAllCerts = new TrustManager[]{ new DefaultTrustManager() {} };
+			SSLContext context;
+			context = SSLContext.getInstance("TLS");
+			context.init(null, trustAllCerts, new SecureRandom());
+			engine = context.createSSLEngine();
+			engine.setUseClientMode(true);
+			
+			AppData = ByteBuffer.allocate(1024);
+			NetData = ByteBuffer.allocate(1024);
+			NodeAppData = ByteBuffer.allocate(1024);
+			NodeNetData = ByteBuffer.allocate(1024);
+			
+			connect(srvIP, srvPort);
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	//** 연결 부분 **
@@ -49,31 +69,14 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 	@Override
 	public void run() {
 		// 서버와 연결
-		srvIP = "127.0.0.1";
+		//srvIP = "127.0.0.1";
 		srvPort = 8500;
-
-		recvMsg = new MessengerClientReceivedMsg();
 		
-		// 클라이언트는 인증서를 서버에서 받아오므로 default context, engine 생성
-		try {
-			TrustManager[] trustAllCerts = new TrustManager[]{ new DefaultTrustManager() {} };
-			SSLContext context;
-			context = SSLContext.getInstance("TLS");
-			context.init(null, trustAllCerts, new SecureRandom());
-			engine = context.createSSLEngine();
-			engine.setUseClientMode(true);
-			
-			AppData = ByteBuffer.allocate(1024);
-			NetData = ByteBuffer.allocate(1024);
-			NodeAppData = ByteBuffer.allocate(1024);
-			NodeNetData = ByteBuffer.allocate(1024);
-		
-			connect(srvIP, srvPort);
-		
+		try {	
 			MessengerClientReceiver receiver = new MessengerClientReceiver(protocol,srvIP,srvPort, channel, engine, recvMsg, frame);
 			Thread receiverThread = new Thread(receiver);
 			receiverThread.start();	
-		
+			
 			//MessengerClientSender sender = new MessengerClientSender(protocol,srvIP,srvPort, channel, engine, recvMsg, frame);
 			//Thread senderThread = new Thread(sender);
 			//senderThread.start();

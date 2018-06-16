@@ -34,6 +34,7 @@ public class Messenger extends JFrame {
 	public String ip;
 	public int port;
 	public static Messenger frame;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -41,7 +42,6 @@ public class Messenger extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					
 					JFrame frame1 = new JFrame("Input your ID");
 				    String temp_id = JOptionPane.showInputDialog(frame1, "What's your name?");
 				    JFrame frame2 = new JFrame("Input server IP");
@@ -57,12 +57,11 @@ public class Messenger extends JFrame {
 					Thread t = new Thread(client);
 					t.start();
 					
-					String idInfo="@userinfo@"+frame.id;
-					System.out.println(idInfo);
+					String idInfo="@userinfo@"+frame.id;					
 					client.recvMsg.msg=idInfo;
+					
 					MessengerClientSender sender;
-				
-					sender = new MessengerClientSender(client.protocol,client.srvIP,8500, client.channel, client.engine,client.recvMsg, client.frame);
+					sender = new MessengerClientSender(client.protocol,client.srvIP,8500, client.channel, client.engine, client.recvMsg, client.frame);
 					Thread senderThread = new Thread(sender);
 					senderThread.start();
 				} catch (Exception e) {
