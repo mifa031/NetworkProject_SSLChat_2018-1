@@ -59,7 +59,6 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 			while(NodeNetData.hasRemaining() && !isClosed) {
 				NodeAppData.clear();
 			    result = engine.unwrap(NodeNetData, NodeAppData);
-			    System.out.println(result.getStatus());
 				switch(result.getStatus()) {
 				case OK:
 					NodeAppData.flip();
