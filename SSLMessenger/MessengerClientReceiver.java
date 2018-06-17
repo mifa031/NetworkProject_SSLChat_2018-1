@@ -66,6 +66,7 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 					Charset charset = Charset.defaultCharset();
 					recvMsg.msg = charset.decode(NodeAppData).toString();
 					frame.receivingTextArea.append(recvMsg.msg+"\n");
+					frame.receivingTextArea.setCaretPosition(frame.receivingTextArea.getDocument().getLength());
 					break;
 				case BUFFER_OVERFLOW:
 					NodeAppData =enlargeAppBuffer(engine,NodeAppData);
