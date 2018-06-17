@@ -38,7 +38,7 @@ public class MessengerClientReceiver extends MessengerBasic implements Runnable 
 	
 	public void run() {
 		try {
-			while(!isClosed) {
+			while(channel.isConnected() && !isClosed) {
 				recv();
 			}
 		} catch (Exception e) {

@@ -300,11 +300,10 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 		}
 
 	public void run() {
-		while(!isClosed) {
+		while(channel.isConnected() && !isClosed) {
 			try {
 				recv(channel,engine);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
