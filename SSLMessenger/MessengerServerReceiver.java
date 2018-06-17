@@ -168,7 +168,19 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 					
 					for(UserInfo u : roomUserInfo.info) {
 						if(u.key==k) {
-								removeRoomUser(u);
+									String sm3="-------------------------\r\n"+
+											  "-    "+u.id+" 님이 채팅방에서 퇴장하셨습니다.     -\r\n"+
+											  "------------------------------------------------------\r\n";
+									for(UserInfo user:roomUserInfo.info) {
+										if(user.key==k) {
+											for(String r : roomUserInfo.room) {
+												if(user.roomname.equals(r)) {
+													broadcastRoomSystem(r,sm3);
+												}
+											}
+										}
+									}
+									removeRoomUser(u);
 						}
 					}
 					
