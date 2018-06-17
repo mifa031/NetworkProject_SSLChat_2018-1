@@ -59,12 +59,10 @@ public class Messenger extends JFrame {
 					t.start();
 					
 					String idInfo="@userinfo@"+frame.id;					
-					client.recvMsg.msg=idInfo;
+					//client.recvMsg.msg=idInfo;
 					
-					MessengerClientSender sender;
-					sender = new MessengerClientSender(client.protocol,client.srvIP,8500, client.channel, client.engine, client.recvMsg, client.frame);
-					Thread senderThread = new Thread(sender);
-					senderThread.start();
+					frame.sendingTextField.setText(idInfo);
+					frame.btnSendButton.doClick();
 					
 				} catch (Exception e) {
 					e.printStackTrace();

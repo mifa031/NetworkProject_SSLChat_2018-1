@@ -44,6 +44,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 		NodeNetData=ByteBuffer.allocate(session.getPacketBufferSize());
 		
 		k = channel.keyFor(selector);
+		explainUser();
 	}
 
 	//클라이언트로 메시지 받음
@@ -73,9 +74,12 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 						control_type=m_array[1];
 						
 					switch(control_type) {
-					
+						
 						case "userinfo" :
 								addUser(m_array[2],engine,k);
+								break;
+						case "explain" :
+								explainUser();
 								break;
 						case "chatroomlist" :
 							    getRoomList();
@@ -269,7 +273,23 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 		MessengerServerSender sender = new MessengerServerSender(engine,channel,roomlist);
 		Thread st2 = new Thread(sender);
 		st2.start();
-	}
+	}	
+	public void explainUser() {
+			String explaintext="------------------------------------------------------------------\r\n"+
+					  "-    *SSL Multi Room Messenger 사용법*     -\r\n"+
+					  "------------------------------------------------------------------\r\n"+
+					  "    @chatroomlist        	  <---     현재 개설된 채팅방 현황 보기\r\n"+
+					  "    @createchatroom@방 이름           <---     '방 이름'으로 채팅방 개설\r\n"+
+					  "    @enterchatroom@방 이름             <---     '방 이름'으로 채팅방 입장\r\n"+
+					  "    @exitchatroom              <---     핸재 자신이 속한 채팅방에서 퇴장\r\n"+
+					  "    @explain                   <---     사용법 다시보기          \r\n"+
+					  "                                                       \r\n"+
+					  "    주의 사항 : 채팅방으로 입장 or 개설하셔야 채팅이 가능합니다.\r\n"+
+					  "------------------------------------------------------------------\r\n";
+			MessengerServerSender sender = new MessengerServerSender(engine,channel,explaintext);
+			Thread st2 = new Thread(sender);
+			st2.start();
+		}
 
 	public void run() {
 		while(!isClosed) {
