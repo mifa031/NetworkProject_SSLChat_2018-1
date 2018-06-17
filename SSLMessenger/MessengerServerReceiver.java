@@ -172,7 +172,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 						}
 					}
 					
-					System.out.println("클라이언트 쪽의 종료 요청으로, 채팅 서버를 종료합니다.");
+					System.out.println("클라이언트 쪽의 종료 요청으로, 연결을 종료합니다.");
 					closeConnection(channel,engine);
 					break;
 				default:
