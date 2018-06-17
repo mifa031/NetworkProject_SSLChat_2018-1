@@ -165,6 +165,13 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 					break;
 				case CLOSED:
 					isClosed = true;
+					
+					for(UserInfo u : roomUserInfo.info) {
+						if(u.key==k) {
+								removeRoomUser(u);
+						}
+					}
+					
 					System.out.println("클라이언트 쪽의 종료 요청으로, 채팅 서버를 종료합니다.");
 					closeConnection(channel,engine);
 					break;
@@ -229,13 +236,14 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 	}
 	//채팅방에서 유저 삭제
 	public void removeRoomUser(UserInfo u) {
-		Vector<UserInfo> roomvector = roomUserInfo.map.get(u.roomname);
-		roomvector.remove(u);
-		u.roomname=null;
-		if(roomvector.size()==0) {
-			removeRoom(u.roomname);
+		if(u.roomname != null){
+			Vector<UserInfo> roomvector = roomUserInfo.map.get(u.roomname);
+			roomvector.remove(u);
+			if(roomvector.size()==0) {
+				removeRoom(u.roomname);
+			}
+			u.roomname=null;
 		}
-		
 	}
 	//방 사용자에게 모두 메시지 전송
 	
