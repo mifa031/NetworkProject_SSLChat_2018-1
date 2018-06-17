@@ -174,7 +174,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 									for(UserInfo user:roomUserInfo.info) {
 										if(user.key==k) {
 											for(String r : roomUserInfo.room) {
-												if(user.roomname.equals(r)) {
+												if(user.roomname != null && user.roomname.equals(r)) {
 													broadcastRoomSystem(r,sm3);
 												}
 											}
