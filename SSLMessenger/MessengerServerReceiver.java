@@ -44,7 +44,6 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 		NodeNetData=ByteBuffer.allocate(session.getPacketBufferSize());
 		
 		k = channel.keyFor(selector);
-		explainUser();
 	}
 
 	//클라이언트로 메시지 받음
@@ -215,6 +214,7 @@ public class MessengerServerReceiver extends MessengerBasic implements Runnable 
 		userInfo.engine=engine;
 		userInfo.key=key;
 		roomUserInfo.info.add(userInfo);
+		explainUser();
 		
 	}
 	//채팅방 추가

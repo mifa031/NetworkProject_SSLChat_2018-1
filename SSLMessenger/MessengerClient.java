@@ -75,7 +75,7 @@ public class MessengerClient extends MessengerBasic implements Runnable{
 		srvPort = 8700;
 		
 		try {	
-			MessengerClientReceiver receiver = new MessengerClientReceiver(protocol,InetAddress.getLocalHost().getHostAddress(),srvPort, channel, engine, recvMsg, frame);
+			MessengerClientReceiver receiver = new MessengerClientReceiver(protocol,"localhost",srvPort, channel, engine, recvMsg, frame);
 			Thread receiverThread = new Thread(receiver);
 			receiverThread.start();
 		}catch(Exception e) {

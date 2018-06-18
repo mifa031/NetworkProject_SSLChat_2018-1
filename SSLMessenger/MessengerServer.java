@@ -116,7 +116,7 @@ public class MessengerServer extends MessengerBasic  {
 	
 	public static void main(String args[]) {
 		try {		
-			MessengerServer server = new MessengerServer("TLS",InetAddress.getLocalHost().getHostAddress(),8700);
+			MessengerServer server = new MessengerServer("TLS","localhost",8700);
 			server.startServer();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
