@@ -54,12 +54,11 @@ public class Messenger extends JFrame {
 					
 					frame.setVisible(true);
 					
-					client = new MessengerClient(frame.ip, 8500, frame);
+					client = new MessengerClient(frame.ip, 8700, frame);
 					Thread t = new Thread(client);
 					t.start();
 					
 					String idInfo="@userinfo@"+frame.id;					
-					//client.recvMsg.msg=idInfo;
 					
 					frame.sendingTextField.setText(idInfo);
 					frame.btnSendButton.doClick();
@@ -104,7 +103,7 @@ public class Messenger extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				MessengerClientSender sender;
 				try {
-					sender = new MessengerClientSender(client.protocol,client.srvIP,8500, client.channel, client.engine, client.recvMsg, client.frame);
+					sender = new MessengerClientSender(client.protocol,client.srvIP,8700, client.channel, client.engine, client.recvMsg, client.frame);
 					Thread senderThread = new Thread(sender);
 					senderThread.start();
 				} catch (Exception e) {

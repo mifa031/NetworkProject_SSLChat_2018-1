@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -115,7 +116,7 @@ public class MessengerServer extends MessengerBasic  {
 	
 	public static void main(String args[]) {
 		try {		
-			MessengerServer server = new MessengerServer("TLS","127.0.0.1",8500);
+			MessengerServer server = new MessengerServer("TLS",InetAddress.getLocalHost().getHostAddress(),8700);
 			server.startServer();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
